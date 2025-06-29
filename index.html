@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gerador de Senhas</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>🔐 Gerador de Senhas</h1>
+
+    <div class="password-box">
+      <span id="passwordDisplay">Clique em "Gerar Senha"</span>
+      <button onclick="copyPassword()">Copiar</button>
+    </div>
+
+    <div class="options">
+      <label>
+        Comprimento: <span id="lengthDisplay">12</span>
+        <input type="range" id="length" min="6" max="32" value="12" oninput="updateLength()">
+      </label>
+      <label><input type="checkbox" id="uppercase" checked> Incluir letras maiúsculas</label>
+      <label><input type="checkbox" id="lowercase" checked> Incluir letras minúsculas</label>
+      <label><input type="checkbox" id="numbers" checked> Incluir números</label>
+      <label><input type="checkbox" id="symbols" checked> Incluir símbolos</label>
+    </div>
+
+    <button class="generate-btn" onclick="generatePassword()">Gerar Senha</button>
+    
+    <div class="strength" id="strengthLabel"></div>
+  </div>
+
+  <script>
+    function updateLength() {
+      const length = document.getElementById("length").value;
+      document.getElementById("lengthDisplay").textContent = length;
+    }
+
+    function generatePassword() {
+      const length = parseInt(document.getElementById("length").value);
+      const useUpper = document.getElementById("uppercase").checked;
+      const useLower = document.getElementById("lowercase").checked;
+      const useNumbers = document.getElementById("numbers").checked;
+      const useSymbols = document.getElementById("symbols").checked;
+
+      const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      const lower = "abcdefghijklmnopqrstuvwxyz";
+      const numbers = "0123456789";
+      const symbols = "!@#$%^&*()_+[]{}|;:,.<>?";
+
+      let allChars = "";
+      if (useUpper) allChars += upper;
+      if (useLower) allChars += lower;
+      if (useNumbers) allChars += numbers;
+      if (useSymbols) allChars += symbols;
+
+      if (allChars.length === 0) {
+        document.getElementById("passwordDisplay").textContent = "Selecione ao menos uma opção.";
+        document.getElementById("strengthLabel").textContent = "";
+        return;
+      }
+
+      let password = "";
+      for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * allChars.length);
+        password += allChars[randomIndex];
+      }
+
+      document.getElementById("passwordDisplay").textContent = password;
+      evaluateStrength(password);
+    }
+
+    function copyPassword() {
+      const password = document.getElementById("passwordDisplay").textContent;
+      if (password && password !== "Clique em \"Gerar Senha\"") {
+        navigator.clipboard.writeText(password).then(() => {
+          alert("Senha copiada!");
+        });
+      }
+    }
+
+    function evaluateStrength(password) {
+      const length = password.length;
+      let strength = 0;
+      if (/[a-z]/.test(password)) strength++;
+      if (/[A-Z]/.test(password)) strength++;
+      if (/\d/.test(password)) strength++;
+      if (/[\W_]/.test(password)) strength++;
+      if (length >= 12) strength++;
+
+      const strengthLabel = document.getElementById("strengthLabel");
+      if (strength <= 2) {
+        strengthLabel.textContent = "Força: Fraca 🔴";
+        strengthLabel.className = "strength weak";
+      } else if (strength === 3 || strength === 4) {
+        strengthLabel.textContent = "Força: Média 🟠";
+        strengthLabel.className = "strength medium";
+      } else {
+        strengthLabel.textContent = "Força: Forte 🟢";
+        strengthLabel.className = "strength strong";
+      }
+    }
+
+    updateLength();
+  </script>
+</body>
+</html>
